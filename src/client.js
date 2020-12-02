@@ -112,3 +112,4 @@ const batchListBytes = protobuf.BatchList.encode({
     }
   }
 })();
+
