@@ -17,7 +17,7 @@
 
 "use strict";
 
-const ShipperPayload = require("./payload");
+const ShippingPayload = require("./payload");
 
   const { SHIPPING_NAMESPACE, SHIPPING_FAMILY, ShippingState } = require("./state");
 
@@ -89,10 +89,12 @@ class ShippingHandler extends TransactionHandler {
   }
 
   apply(transactionProcessRequest, context) {
-    let payload = ShipperPayload.fromBytes(transactionProcessRequest.payload);
+    let payload = ShippingPayload.fromBytes(transactionProcessRequest.payload);
     let shippingState = new ShippingState(context);
     let header = transactionProcessRequest.header;
     let shipper = header.signerPublicKey;
+
+    console.log('---------------', payload)
 
     if (payload.action === "create") {
       return shippingState.getPackage(payload.id).then((pack) => {
@@ -104,11 +106,13 @@ class ShippingHandler extends TransactionHandler {
           id: payload.id,
           history: [],
           location: "",
-          time: Date.now()
         };
 
         console.log(
-          `Shipper ${shipper.toString().substring(0, 6)} created packages ${
+          `-------------------------------------------
+          -----------------------------------
+          -----------------------------------
+          -------------------------------Shipper ${shipper.toString().substring(0, 6)} created packages ${
             payload.id
           }`
         );
@@ -128,12 +132,15 @@ class ShippingHandler extends TransactionHandler {
           );
         }
 
-        pack.history.push({location: payload.location, time: payload.time});
+        console.log(pack)
+
+        pack.history.push(pack.location);
+        pack.location = payload.location;
 
         let shipperString = shipper.toString().substring(0, 6);
 
         console.log(
-          `Shipper ${shipperString} takes location: ${payload.location}\n\n`
+          `Shipper ${shipperString} takes location: ${pack.location} history: ${pack.history}\n\n`
         );
 
         return shippingState.setPackage(payload.id, pack);

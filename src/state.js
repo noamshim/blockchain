@@ -114,23 +114,25 @@ module.exports = {
 };
 
 const _deserialize = (data) => {
+  console.log('data:', data)
   let packagesIterable = data
     .split("|")
     .map((x) => x.split(","))
     .map((x) => [
       x[0],
-      { id: x[0], history: x[1], location: x[2], time: x[3] },
+      { id: x[0], history: x[1].split("@"), location: x[2] },
     ]);
   return new Map(packagesIterable);
 };
 
 const _serialize = (packages) => {
+  console.log('packages:', packages)
   let packageStrs = [];
   for (let idPackage of packages) {
     let id = idPackage[0];
     let pack = idPackage[1];
     packageStrs.push(
-      [id, pack.history, pack.location, pack.time].join(",")
+      [id, pack.history.join("@"), pack.location].join(",")
     );
   }
 

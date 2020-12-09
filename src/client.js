@@ -23,7 +23,7 @@ const SHIPPING_NAMESPACE = _hash(SHIPPING_FAMILY).substring(0, 6);
 const _makeShippingAddress = (x) => SHIPPING_NAMESPACE + _hash(x);
 
 const createTransaction = (payload) => {
-  const [packageID, action, location, time] = payload.split(",");
+  const [packageID, action, location] = payload.split(",");
   const encoder = new TextEncoder("utf8");
   const payloadBytes = encoder.encode(payload);
   const transactionHeaderBytes = protobuf.TransactionHeader.encode({
@@ -49,6 +49,8 @@ const createTransaction = (payload) => {
       .update(payloadBytes)
       .digest("hex"),
   }).finish();
+
+
 
   // const signature = signer.sign(transactionHeaderBytes);
 
@@ -77,7 +79,7 @@ const createBatch = (transactions) => {
 };
 
 /* This batch creates a new game */
-const batchToSend = createBatch([createTransaction(`PackageID,create,,`)]);
+const batchToSend = createBatch([createTransaction(`PackageID,update,dfgbhn`)]);
 
 const batchListBytes = protobuf.BatchList.encode({
   batches: [batchToSend],

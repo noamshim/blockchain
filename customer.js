@@ -1,3 +1,5 @@
+const { get } = require("request");
+
 const onSubmit = function () {
     let id = document.getElementById("customerPackageID").innerHTML;
     if(id == null || id.length === 0){
