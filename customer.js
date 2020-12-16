@@ -1,11 +1,17 @@
-const { get } = require("request");
+// const { get } = require("request");
+// var requirejs = require('requirejs');
 
-const onSubmit = function () {
-    let id = document.getElementById("customerPackageID").innerHTML;
-    if(id == null || id.length === 0){
-        document.getElementById("customerError").innerHTML = "Invalid package ID";
-    }
-    else{
+// requirejs.config({
+//     //Pass the top-level main.js/index.js require
+//     //function to requirejs so that node modules
+//     //are loaded relative to the top-level JS file.
+//     nodeRequire: require
+// });
+const api = createApiClient();
 
-    }
+function onSubmit() {
+    
+    const package_id = document.getElementById("customerPackageID").value;
+    console.log(package_id)
+    api.getPackage({package_id: package_id})
 }

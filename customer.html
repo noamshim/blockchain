@@ -5,12 +5,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Title</title>
-  <script src="src/client.js"></script>
+    <!-- <script>
+      require('module');
+    </script> -->
+
 </head>
 <body>
 <div class="background">
 <div class="barak">
-  <form action="">
+  <form onsubmit="onSubmit();return false">
     <div class="form-group">
       <label for="customerPackageID" class="h3 mb-3 font-weight-normal">Please enter a package number</label>
       <input type="text" class="form-control" id="customerPackageID" placeholder="Package Number">
@@ -21,7 +24,13 @@
   </div>
   </div>
 </body>
-
+<!-- <script type="module">
+  import './node_modules/.bin/module';
+  const require = createRequire(import.meta.url);
+</script> -->
+<script src="node_modules/axios/dist/axios.min.js"></script>
+<script src="./api.js"></script>
+<script src="./customer.js"></script>
 <style>
   .barak {
     position: absolute;

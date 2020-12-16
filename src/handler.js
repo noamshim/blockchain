@@ -105,7 +105,7 @@ class ShippingHandler extends TransactionHandler {
         let createdPackage = {
           id: payload.id,
           history: [],
-          location: "",
+          location: payload.location,
         };
 
         console.log(

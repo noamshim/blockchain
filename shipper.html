@@ -9,12 +9,12 @@
 <body>
 <div class="background">
 <div class="barak">
-  <form>
+  <form onsubmit="onSubmit(); return false">
     <div class="form-group">
       <label for="exampleInputEmail1" class="h3 mb-3 font-weight-normal">Please enter the details below</label>
-        <input type="text" class="form-control mb-2" id="exampleInputEmail1" placeholder="Package Number">
-        <input type="text" class="form-control mb-2"  placeholder="Location">
-        <input type="text" class="form-control"  placeholder="Name">
+        <input type="text" class="form-control mb-2" id="shipperPackageId" placeholder="Package Number">
+        <input type="text" class="form-control mb-2" placeholder="Location" id="shipperLocation">
+        <input type="text" class="form-control" placeholder="Name" id="shipperName">
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
@@ -44,4 +44,7 @@
     height: 100%;
   }
 </style>
+<script src="node_modules/axios/dist/axios.min.js"></script>
+<script src="./api.js"></script>
+<script src="./shipper.js"></script>
 </html>
