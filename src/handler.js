@@ -106,6 +106,8 @@ class ShippingHandler extends TransactionHandler {
           id: payload.id,
           history: [],
           location: payload.location,
+          name: payload.name,
+          time: payload.time
         };
 
         console.log(
@@ -134,13 +136,15 @@ class ShippingHandler extends TransactionHandler {
 
         console.log(pack)
 
-        pack.history.push(pack.location);
+        pack.history.push({location: pack.location, name: pack.name, time: pack.time});
         pack.location = payload.location;
+        pack.name = payload.name;
+        pack.time = payload.time;
 
         let shipperString = shipper.toString().substring(0, 6);
 
         console.log(
-          `Shipper ${shipperString} takes location: ${pack.location} history: ${pack.history}\n\n`
+          `Shipper ${shipperString} takes location: ${pack.location} history: ${pack.history} name: ${pack.name} time: ${pack.time}\n\n`
         );
 
         return shippingState.setPackage(payload.id, pack);

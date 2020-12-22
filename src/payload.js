@@ -20,16 +20,18 @@ const { TextEncoder, TextDecoder } = require("text-encoding/lib/encoding");
 const { InvalidTransaction } = require("sawtooth-sdk/processor/exceptions");
 const decoder = new TextDecoder("utf8");
 class ShippingPayload {
-  constructor(id, action, location) {
+  constructor(id, action, location, name, time) {
     this.id = id;
     this.action = action;
     this.location = location;
+    this.name = name;
+    this.time = time;
   }
 
   static fromBytes(payload) {
     payload = decoder.decode(payload).split(",");
-    if (payload.length === 3) {
-      let shippingPayload = new ShippingPayload(payload[0], payload[1], payload[2]);
+    if (payload.length === 5) {
+      let shippingPayload = new ShippingPayload(payload[0], payload[1], payload[2], payload[3], payload[4]);
       console.log('**********success payload')
       if (!shippingPayload.id) {
         throw new InvalidTransaction("Package id is required");

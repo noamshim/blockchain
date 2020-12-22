@@ -12,5 +12,7 @@ const api = createApiClient();
 function onSubmit() {
     const package_id = document.getElementById("shipperPackageId").value;
     const location = document.getElementById("shipperLocation").value;
-    api.updatePackage({package_id: package_id, location: location});
+    const name = document.getElementById("shipperName").value;
+    const time = Date.now();
+    api.updatePackage({package_id: package_id, location: location, name:name, time:time});
 }

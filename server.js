@@ -6,6 +6,30 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const { createContext, CryptoFactory } = require("sawtooth-sdk/signing");
+const crypto = require("crypto");
+const { protobuf } = require("sawtooth-sdk");
+const fetch = require("node-fetch");
+const context = createContext("secp256k1");
+const { TextEncoder, TextDecoder } = require("text-encoding/lib/encoding");
+const privateKey = context.newRandomPrivateKey();
+const cryptoFact = new CryptoFactory(context);
+const signer = cryptoFact.newSigner(privateKey);
+
+const ShippingPayload = require("./src/payload");
+    
+const _hash = (x) =>
+  crypto
+    .createHash("sha512")
+    .update(x)
+    .digest("hex")
+    .toLowerCase()
+    .substring(0, 64);
+
+const SHIPPING_FAMILY = "shipping";
+const SHIPPING_NAMESPACE = _hash(SHIPPING_FAMILY).substring(0, 6);
+const _makeShippingAddress = (x) => SHIPPING_NAMESPACE + _hash(x);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
@@ -25,33 +49,11 @@ process.on( 'SIGINT', async function() {
 });
 
 
-const block = function (_package_id, _action, _location) {
-    const { createContext, CryptoFactory } = require("sawtooth-sdk/signing");
-    const crypto = require("crypto");
-    const { protobuf } = require("sawtooth-sdk");
-    const fetch = require("node-fetch");
-    const context = createContext("secp256k1");
-    const { TextEncoder, TextDecoder } = require("text-encoding/lib/encoding");
-    const privateKey = context.newRandomPrivateKey();
-    const cryptoFact = new CryptoFactory(context);
-    const signer = cryptoFact.newSigner(privateKey);
-    
-    const ShippingPayload = require("./src/payload");
-    
-    const _hash = (x) =>
-      crypto
-        .createHash("sha512")
-        .update(x)
-        .digest("hex")
-        .toLowerCase()
-        .substring(0, 64);
-    
-    const SHIPPING_FAMILY = "shipping";
-    const SHIPPING_NAMESPACE = _hash(SHIPPING_FAMILY).substring(0, 6);
-    const _makeShippingAddress = (x) => SHIPPING_NAMESPACE + _hash(x);
+const block = function (_package_id, _action, _location, _name, _time) {
+  console.log(_package_id, _action, _location, _name)
     
     const createTransaction = (payload) => {
-      const [packageID, action, location] = payload.split(",");
+      const [packageID, action, location, name, time] = payload.split(",");
       const encoder = new TextEncoder("utf8");
       const payloadBytes = encoder.encode(payload);
       const transactionHeaderBytes = protobuf.TransactionHeader.encode({
@@ -107,7 +109,7 @@ const block = function (_package_id, _action, _location) {
     };
     
     /* This batch creates a new game */
-    const batchToSend = createBatch([createTransaction(`${_package_id},${_action},${_location}`)]);
+    const batchToSend = createBatch([createTransaction(`${_package_id},${_action},${_location},${_name},${_time}`)]);
     
     const batchListBytes = protobuf.BatchList.encode({
       batches: [batchToSend],
@@ -173,8 +175,19 @@ app.post('/api/customer', (req, res) => {
 	if (id == null || id === undefined) {
         res.status(200).send({msg: 'Invalid package id', id: id}) // Internal Server Error
     } else {
-        block(id, 'get');
-        res.status(200).send({msg: 'Success'}) // Internal Server Error
+          var geturl = "http://localhost:8008/state/" + _makeShippingAddress(id); //endpoint used to retrieve data from an address in Sawtooth blockchain
+          console.log("Getting from: " + geturl);
+          fetch(geturl, {
+            method: "GET",
+          }).then((response) => {
+            response.json().then((responseJson) => {
+              var data = responseJson.data;
+              var newdata = Buffer.from(data, "base64").toString();
+              res.status(200).send(state_to_object(newdata));
+            });
+          }).catch ((error) => {
+            res.status(400).send({err: 'error'})
+      } )
     }
 })
 
@@ -182,12 +195,14 @@ app.post('/api/customer', (req, res) => {
 app.post('/api/shipper', (req, res) => {
     const id = req.body.package_id;
     const location = req.body.location;
+    const name = req.body.name;
+    const time = req.body.time;
 	if (id == null || id === undefined) {
         res.status(200).send({msg: 'Invalid package id'}) // Internal Server Error
     } else if (location == null || location === undefined) {
         res.status(200).send({msg: 'Invalid location'}) // Internal Server Error
     } else {
-        block(id, 'update', location);
+        block(id, 'update', location, name, time);
         res.status(200).send({msg: 'Success'}) // Internal Server Error
     }
 })
@@ -196,15 +211,42 @@ app.post('/api/shipper', (req, res) => {
 app.post('/api/creator', (req, res) => {
     const id = req.body.package_id;
     const location = req.body.location;
+    const name = req.body.name;
+    const time = req.body.time;
+    console.log('%%%%%%%%%%%%%%%',id,location,name)
 	if (id == null || id === undefined) {
         res.status(200).send({msg: 'Invalid package id'}) // Internal Server Error
     } else if (location == null || location === undefined) {
         res.status(200).send({msg: 'Invalid location'}) // Internal Server Error
     } else {
-        block(id, 'create', location);
+        block(id, 'create', location, name, time);
         res.status(200).send({msg: 'Success'}) // Internal Server Error
     }
 })
+
+const state_to_object = (data) => {
+  let packagesIterable = data
+    .split("|")
+    .map((x) => x.split(","))
+    .map((x) => [
+      x[0],
+      { id: x[0], history: string_to_history(x[1]), location: x[2], name: x[3], time: x[4] },
+    ]);
+
+
+  return {result: packagesIterable};
+};
+
+const string_to_history = (string) => {
+  let historyIterable = string
+    .split("$")
+    .map((x) => x.split("@"))
+    .map((x) => {
+      return { location: x[0], name: x[1], time: x[2] }
+    });
+
+  return historyIterable;
+}
 // ***********************************************
 
 // --> general user requests: register/login

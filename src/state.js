@@ -120,10 +120,23 @@ const _deserialize = (data) => {
     .map((x) => x.split(","))
     .map((x) => [
       x[0],
-      { id: x[0], history: x[1].split("@"), location: x[2] },
+      { id: x[0], history: string_to_history(x[1]), location: x[2], name: x[3], time: x[4] },
     ]);
+
+
   return new Map(packagesIterable);
 };
+
+const string_to_history = (string) => {
+  let historyIterable = string
+    .split("$")
+    .map((x) => x.split("@"))
+    .map((x) => {
+      return { location: x[0], name: x[1], time: x[2] }
+    });
+
+  return historyIterable;
+}
 
 const _serialize = (packages) => {
   console.log('packages:', packages)
@@ -131,8 +144,9 @@ const _serialize = (packages) => {
   for (let idPackage of packages) {
     let id = idPackage[0];
     let pack = idPackage[1];
+    console.log('*********',history_to_string(pack.history))
     packageStrs.push(
-      [id, pack.history.join("@"), pack.location].join(",")
+      [id, history_to_string(pack.history), pack.location, pack.name, pack.time].join(",")
     );
   }
 
@@ -140,3 +154,18 @@ const _serialize = (packages) => {
 
   return Buffer.from(packageStrs.join("|"));
 };
+
+
+const history_to_string = (history) => {
+  
+  let historyStrs = [];
+  for (let event of history) {
+    historyStrs.push(
+      [event.location, event.name, event.time].join("@")
+    );
+  }
+
+  historyStrs.sort();
+
+  return historyStrs.join("$");
+}

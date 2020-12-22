@@ -11,6 +11,8 @@ const api = createApiClient();
 
 function onSubmit() {
     const package_id = document.getElementById("creatorPackageId").value;
+    const name = document.getElementById("creatorName").value;
     const location = document.getElementById("creatorLocation").value;
-    api.createPackage({package_id: package_id, location: location});
+    const time = Date.now();
+    api.createPackage({package_id: package_id, location: location, name: name, time: time});
 }
