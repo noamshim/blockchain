@@ -11,16 +11,23 @@ const api = createApiClient();
 
 function onSubmit() {
     const package_id = document.getElementById("customerPackageID").value;
-    console.log(package_id)
     api.getPackage({package_id: package_id}).then((response) => {
         if (response == null || response === undefined || response.result == null || response.result === undefined) {
-            console.log("error:", response);
-            return;
+            if (response.err) {
+                alert(`Error: ${response.err}`);
+                document.getElementById("customerPackageID").value = null;
+                return;
+            } else {
+                alert(`Error: ${response}`);
+                return;
+            }
         }
-        
-        let path = window.location.pathname;
 
-        window.location = `${path.substring(0, path.lastIndexOf("/"))}/show_results.html`
+        window.sessionStorage.setItem(package_id, JSON.stringify(response));
+
+        let path = window.location.pathname;
+        window.location = `${path.substring(0, path.lastIndexOf("/"))}/show_results.html?id=${package_id}`
         
-    })
+    }).catch(() => alert("error"))
 }
+

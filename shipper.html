@@ -5,10 +5,13 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="html5-qrcode.min.js"></script>
 </head>
 <body>
-<div class="background">
-<div class="barak">
+<div class="background" id="shipper-background">
+  <br><h1 style="text-align: center">Updating a package location</h1>
+  <div class="barak">
+    <div style="width: 500px" id="reader"></div>
   <form onsubmit="onSubmit(); return false">
     <div class="form-group">
       <label for="exampleInputEmail1" class="h3 mb-3 font-weight-normal">Please enter the details below</label>
@@ -24,14 +27,14 @@
 
 <style>
   .barak {
-    position: absolute;
     margin: auto;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
     width: 500px;
-    height: 250px;
+    height: 100%;
+    position: relative;
   }
 
   .btn-primary {
@@ -41,8 +44,16 @@
     background-color: #f8f9fa;
     position: absolute;
     width: 100%;
+    display: block;
+    height: 100%;
+    overflow-y: hidden;
+  }
+
+  body {
+    display: block;
     height: 100%;
   }
+
 </style>
 <script src="node_modules/axios/dist/axios.min.js"></script>
 <script src="./api.js"></script>

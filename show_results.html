@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+
+<h2>Showing results for package ID: 
+    <span id="show-results-pack-id"></span>
+    <span style="position: absolute; right: 0; margin-right: 10px;">
+        <button class="button button2" onclick="onClick()">New search</button>
+    </span>
+</h2>
+        
+
+
+<table style="width:100%" id="show-results-table">
+  <tr>
+    <th>Time</th>
+    <th>Location</th> 
+    <th>Name</th>
+  </tr>
+</table>
+
+</body>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.button2 {
+  background-color: #008CBA;
+  color: white;
+}
+
+.button2:hover {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #008CBA;
+}
+
+
+</style>
+<script src="./show_results.js"></script>
+</html>

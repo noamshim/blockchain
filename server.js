@@ -131,23 +131,6 @@ const block = function (_package_id, _action, _location, _name, _time) {
           console.error(error);
         }
       } 
-    //   else if (_action === 'get') {
-    //     try {
-    //         var geturl = "http://localhost:8008/state"; //endpoint used to retrieve data from an address in Sawtooth blockchain
-    //         console.log("Getting from: " + geturl);
-    //         let response = await fetch(geturl, {
-    //           method: "GET",
-    //         });
-    //         let responseJson = await response.json();
-    //         var data = responseJson.data;
-    //         console.log("data--", data);
-    //         var newdata = Buffer.from(data, "base64").toString();
-    //         console.log("newdata--", newdata);
-    //         // return newdata;
-    //       } catch (error) {
-    //         console.error(error);
-    //       }
-    //   } 
       else {
         try {
           let resp = await fetch("http://localhost:8008/batches", {
@@ -165,25 +148,33 @@ const block = function (_package_id, _action, _location, _name, _time) {
     
 }
 
-//**** debug *** (ToRemove): *********************
 app.get('/', (req, res) => {
 	res.send("This Is Our Secure Server!")
 });
 
 app.post('/api/customer', (req, res) => {
-    const id = req.body.package_id;
+  const id = _hash(req.body.package_id)
 	if (id == null || id === undefined) {
         res.status(200).send({msg: 'Invalid package id', id: id}) // Internal Server Error
     } else {
-          var geturl = "http://localhost:8008/state/" + _makeShippingAddress(id); //endpoint used to retrieve data from an address in Sawtooth blockchain
+          var geturl = "http://localhost:8008/batches"; //endpoint used to retrieve data from an address in Sawtooth blockchain
           console.log("Getting from: " + geturl);
           fetch(geturl, {
             method: "GET",
           }).then((response) => {
             response.json().then((responseJson) => {
-              var data = responseJson.data;
-              var newdata = Buffer.from(data, "base64").toString();
-              res.status(200).send(state_to_object(newdata));
+              const data = responseJson.data;
+              const transactions = data.map(d => d.transactions[0]);
+              const trans_shipping = transactions.filter(t => t.header.family_name === 'shipping');
+              const payloads = trans_shipping.map(s => Buffer.from(s.payload, "base64").toString().split(','));
+              const id_payloads = payloads.filter(p => p[0] === id);
+              if (id_payloads.length === 0) {
+                res.status(200).send({err: "Package id doesn't exist"});
+              } else {
+                const result = JSON.stringify({result: id_payloads});
+                console.log(id_payloads)
+                res.status(200).send(result);
+              }
             });
           }).catch ((error) => {
             res.status(400).send({err: 'error'})
@@ -202,25 +193,66 @@ app.post('/api/shipper', (req, res) => {
     } else if (location == null || location === undefined) {
         res.status(200).send({msg: 'Invalid location'}) // Internal Server Error
     } else {
-        block(id, 'update', location, name, time);
-        res.status(200).send({msg: 'Success'}) // Internal Server Error
+        var geturl = "http://localhost:8008/batches"; //endpoint used to retrieve data from an address in Sawtooth blockchain
+        fetch(geturl, {
+          method: "GET",
+        }).then((response) => {
+          response.json().then((responseJson) => {
+            const data = responseJson.data;
+            const transactions = data.map(d => d.transactions[0]);
+            const trans_shipping = transactions.filter(t => t.header.family_name === 'shipping');
+            const payloads = trans_shipping.map(s => Buffer.from(s.payload, "base64").toString().split(','));
+            const id_payloads = payloads.filter(p => p[0] === id);
+            if (id_payloads.length == 0) {
+              res.status(200).send({msg: "Package id doesn't exists"})
+            } else {
+              block(id, 'update', location, name, time);
+              res.status(200).send({msg: 'Success'}) 
+            }
+          });
+        }).catch ((error) => {
+          res.status(400).send({err: 'Internal error'})// Internal Server Error
+        })
     }
 })
 
 
 app.post('/api/creator', (req, res) => {
-    const id = req.body.package_id;
+    const id = _hash(req.body.package_id);
+    
+    // crypto
+    // .createHash("sha512")
+    // .update(req.body.package_id)
+    // .digest("hex")
     const location = req.body.location;
     const name = req.body.name;
     const time = req.body.time;
     console.log('%%%%%%%%%%%%%%%',id,location,name)
 	if (id == null || id === undefined) {
-        res.status(200).send({msg: 'Invalid package id'}) // Internal Server Error
+        res.status(200).send({err: 'Invalid package id'}) // Internal Server Error
     } else if (location == null || location === undefined) {
-        res.status(200).send({msg: 'Invalid location'}) // Internal Server Error
+        res.status(200).send({err: 'Invalid location'}) // Internal Server Error
     } else {
-        block(id, 'create', location, name, time);
-        res.status(200).send({msg: 'Success'}) // Internal Server Error
+        var geturl = "http://localhost:8008/batches"; //endpoint used to retrieve data from an address in Sawtooth blockchain
+        fetch(geturl, {
+          method: "GET",
+        }).then((response) => {
+          response.json().then((responseJson) => {
+            const data = responseJson.data;
+            const transactions = data.map(d => d.transactions[0]);
+            const trans_shipping = transactions.filter(t => t.header.family_name === 'shipping');
+            const payloads = trans_shipping.map(s => Buffer.from(s.payload, "base64").toString().split(','));
+            const id_payloads = payloads.filter(p => p[0] === id);
+            if (id_payloads.length > 0) {
+              res.status(200).send({err: 'Package id already exists'})
+            } else {
+              block(id, 'create', location, name, time);
+              res.status(200).send({msg: id}) 
+            }
+          });
+        }).catch ((error) => {
+          res.status(400).send({err: 'Internal error'})// Internal Server Error
+        })
     }
 })
 

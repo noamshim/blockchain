@@ -5,10 +5,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 </head>
 <body>
 <div class="background">
-<div class="barak">
+  <br><h1 style="text-align: center">Creating a package for shipment</h1>
+<div class="barak" id="creator-main">
   <form onsubmit="onSubmit(); return false">
     <div class="form-group">
       <label for="exampleInputEmail1" class="h3 mb-3 font-weight-normal">Please enter the details below</label>
@@ -43,6 +45,31 @@
     width: 100%;
     height: 100%;
   }
+  .button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.button2 {
+  background-color: #008CBA;
+  color: white;
+}
+
+.button2:hover {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #008CBA;
+}
 </style>
 <script src="node_modules/axios/dist/axios.min.js"></script>
 <script src="./api.js"></script>
